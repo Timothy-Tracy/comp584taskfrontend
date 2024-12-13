@@ -15,7 +15,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useAuth } from "../AuthContext"
+
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import loginapi from "@/api/login"
@@ -23,6 +23,7 @@ import { useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { deleteCategory, editCategory, EditCategory } from "@/api/categoriesapi"
 import { useCategories } from "@/hooks/CategoriesContext"
+import { useAuth } from "../AuthContext"
 
 const formSchema = z.object({
     title: z.string().min(2, {
@@ -33,8 +34,9 @@ const formSchema = z.object({
 const CategoryForm = ({ title, id }: { title: string, id:number }) => {
     const router = useRouter()
     const {toast} = useToast()
-    const {initCategories} = useCategories();
-
+    const {initCategories,refreshCategories} = useCategories();
+    const {logout} = useAuth()
+           
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -53,7 +55,7 @@ const CategoryForm = ({ title, id }: { title: string, id:number }) => {
                 title: `Successfully Edited Category: ${values.title}`,
                
               })
-          router.refresh()
+              refreshCategories();
         } else {
             toast({
                 title: `Error: ${result.statusText}`,
@@ -72,8 +74,12 @@ const CategoryForm = ({ title, id }: { title: string, id:number }) => {
                 title: `Successfully Deleted Category: ${title}`,
                
               })
-              initCategories()
+              refreshCategories()
         } else {
+          
+            if(result.status == 401){
+                logout()
+            }
             toast({
                 title: `Error: ${result.statusText}`,
                 
@@ -84,7 +90,7 @@ const CategoryForm = ({ title, id }: { title: string, id:number }) => {
     }
 
     return (
-        <div className='flex flex-row w-full align-middle items-center py-2'>
+        <div className='flex flex-row w-full items-center py-2'>
 
             <Form {...form}>
 

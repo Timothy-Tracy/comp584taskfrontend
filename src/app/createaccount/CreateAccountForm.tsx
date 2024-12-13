@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import createaccountapi from "@/api/createaccountapi"
 import { useToast } from "@/hooks/use-toast"
+import loginapi from "@/api/login"
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -33,8 +34,9 @@ const formSchema = z.object({
 
 function CreateAccountForm() {
   const router = useRouter()
-  const { login } = useAuth()
+  const {login, setUser, getStatus, isAuthenticated} = useAuth()
   const {toast} = useToast()
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,6 +60,36 @@ function CreateAccountForm() {
         description: `${JSON.stringify(response.body)}`,
         variant: 'destructive'
       })
+    } else {
+      toast({
+        title: `Successfully Created Account`,
+      });
+      console.log(values)
+    const result = await loginapi(values.username, values.password)
+    if(!result.ok){
+      console.log('toasting')
+      toast({
+        title: `Error: ${result.statusText}`,
+        description: `${JSON.stringify(result.body)}`,
+        variant: 'destructive'
+      })
+
+    } else {
+      console.log(values.username)
+      console.log(values.username)
+
+      console.log(values.username)
+      console.log(values.username)
+
+      setUser(values.username)
+      getStatus()
+      router.push('/')
+    if(isAuthenticated){
+      login(values.username)
+      
+      
+    }
+    }
     }
 
 

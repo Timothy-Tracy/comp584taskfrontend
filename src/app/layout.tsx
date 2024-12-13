@@ -38,7 +38,7 @@ export default function RootLayout({
             <TasksProvider>
         <div className="flex flex-col h-screen w-screen">
           <Header></Header>
-          <div className="flex flex-col h-full w-full border-2 border-red-600">
+          <div className="flex flex-col h-full w-full ">
             {children}
             <Toaster/>
 

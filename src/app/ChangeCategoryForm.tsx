@@ -15,127 +15,111 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useAuth } from "../AuthContext"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import loginapi from "@/api/login"
-import { useEffect } from "react"
-import { useToast } from "@/hooks/use-toast"
-import { postCategory } from "@/api/categoriesapi"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AddTaskToCategory, postTask } from "@/api/tasksapi"
 
-import { useCategories } from "@/hooks/CategoriesContext"
-import { useTasks } from "@/hooks/TasksContext"
+
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AddTaskToCategory } from "@/api/tasksapi";
+import { useCategories } from "@/hooks/CategoriesContext";
+import { useTasks } from "@/hooks/TasksContext";
+import { useAuth } from "./AuthContext";
 
 const formSchema = z.object({
-    title: z.string().min(2, {
-        message: "title must be at least 2 characters.",
-    }),
-  
-})
+  title: z.string().min(2, {
+    message: "title must be at least 2 characters.",
+  }),
+});
 
-const ChangeCategoryForm = ({defaultValue}: {defaultValue:string}) => {
-    const router = useRouter()
-    const { toast } = useToast()
-    const { categories, initCategories } = useCategories();
-    const { tasks, initTasks } = useTasks();
+const ChangeCategoryForm = ({ defaultValue, task }: { defaultValue: number, task: any }) => {
+  const { toast } = useToast();
+  const { categories, initCategories, getCategoryById } = useCategories();
+  const { logout } = useAuth();
+  const [defaultCategoryTitle, setDefaultCategoryTitle] = useState<string | undefined>();
 
+  useEffect(() => {
+    const category = getCategoryById(defaultValue);
+    if (defaultValue && category) {
+      setDefaultCategoryTitle(category.title);
+    }
+  }, [defaultValue, getCategoryById]);
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            title: ''
-        },
-    })
-    useEffect(()=>{
-        initCategories()
-    }, [])
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: '',
+    },
+  });
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
-        // const result = await postTask(values.body)
-        // if (result.ok) {
-        //     toast({
-        //         title: `Successfully Added Task: ${values.title}`,
-
-        //     })
-        //     initTasks()
-        // } else {
-        //     toast({
-        //         title: `Error: ${result.statusText}`,
-        //         description: `${JSON.stringify(result.body)}`,
-        //         variant: 'destructive'
-        //     })
-        // }
-        
-        // const category = categories.filter((category, index) => category.title ==values.title)
-        console.log(values)
-
-        // const result2 = await AddTaskToCategory(result.body.id, category[0].id)
-        // if (result2.ok) {
-        //     toast({
-        //         title: `Successfully Added Task To Category: ${category[0].title}`,
-
-        //     })
-        //     initCategories()
-        // } else {
-        //     toast({
-        //         title: `Error: ${result.statusText}`,
-        //         description: `${JSON.stringify(result.body)}`,
-        //         variant: 'destructive'
-        //     })
-        // }
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const selectedCategory = categories.find(category => category.title === values.title);
+    if (!selectedCategory) {
+      toast({
+        title: `Error: Category not found`,
+        description: `${values.title} is not a valid category`,
+        variant: 'destructive'
+      });
+      return;
     }
 
-    return (
-        <div className='flex flex-row w-full align-middle items-center py-2'>
+    const result = await AddTaskToCategory(task.id, selectedCategory.id);
+    if (result.ok) {
+      toast({
+        title: `Successfully Added Task To Category: ${selectedCategory.title}`,
+      });
+      initCategories();
+    } else {
+      if (result.status === 401) {
+        logout();
+      }
+      toast({
+        title: `Error: ${result.statusText}`,
+        description: `${JSON.stringify(result.body)}`,
+        variant: 'destructive'
+      });
+    }
+  }
 
-            <Form {...form}>
+  return (
+    <div className='flex flex-row w-full align-middle items-center py-2'>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-row align-middle justify-center items-center w-full">
+          <div className="flex w-1/2 justify-start">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem className="flex">
+                  <FormControl>
+                    <Select onValueChange={(value) => {
+                      field.onChange(value);
+                      form.handleSubmit(onSubmit)();
+                    }} defaultValue={getCategoryById(defaultValue)?.title||null}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Uncategorized" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Category</SelectLabel>
+                          {categories.map(category => (
+                            <SelectItem key={category.id} value={category.title}>
+                              {category.title}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
+};
 
-                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-row  align-middle justify-center items-center  w-full">
-                    <div className="flex w-1/2  justify-start">
-                       
-
-                        <FormField
-                            control={form.control}
-                            name="title"
-                            render={({ field }) => (
-                                <FormItem className="flex">
-
-                                    <FormControl>
-                                    <Select onValueChange={(value) => {
-                                        field.onChange(value);
-                                        form.handleSubmit(onSubmit)();
-                                    }} defaultValue={defaultValue}>
-                                            <SelectTrigger className="w-[180px]">
-                                                <SelectValue placeholder="Select a Category" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectGroup>
-                                                    <SelectLabel>Category</SelectLabel>
-                                                    {categories.map((category, index) => {
-                                                        return (
-                                                           <SelectItem  key={category.id} value={category.title}>{category.title}</SelectItem>
-
-                                                        )
-                                                    })}
-                                                </SelectGroup>
-                                            </SelectContent>
-                                        </Select>
-                                    </FormControl>
-
-                                </FormItem>
-                            )}
-                        />
-
-                    </div>
-                    
-
-
-
-                </form>
-            </Form>
-        </div>
-    )
-}
-export default ChangeCategoryForm
+export default ChangeCategoryForm;

@@ -1,4 +1,5 @@
 "use client"
+import { useRouter } from 'next/navigation';
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 // Define the user type
@@ -9,11 +10,12 @@ type User = {
 
 // Define the context value type
 interface AuthContextType {
-  user: User;
+  user: string;
   isAuthenticated: boolean;
   getStatus: () => void;
   login: (username: string) => void;
   logout: () => void;
+  setUser: (arg0: string) => void
 }
 
 // Create the context with a default value
@@ -26,22 +28,26 @@ interface AuthProviderProps {
 
 // Create the provider component
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User>(null);
+  const [user, setUser] = useState<any>(null);
   const [status, setStatus] = useState<boolean>(false);
+  const router = useRouter()
   
   const login = (username: string) => {
-    const mockUser: User = { id: 1, username };
-    setUser(mockUser);
+    setUser(username);
   };
 
   const logout = () => {
     localStorage.removeItem('token')
-    getStatus()
+    setStatus(false)
+    
+    //router.push('/login')
   };
+
+  
 
   const getStatus = () => {
     if (localStorage.getItem('token') == null){
-      setStatus(false)
+      logout()
     } else {
       setStatus(true)
     }
@@ -57,7 +63,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated: !!status,
     getStatus,
     login,
-    logout,
+    logout, setUser
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

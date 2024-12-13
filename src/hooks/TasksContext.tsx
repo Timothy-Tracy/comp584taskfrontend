@@ -19,7 +19,7 @@ export const TasksProvider = ({ children }: { children: ReactNode }) => {
 
     const initTasks = async () => {
         console.log('initTasks called');
-        await initCategories()
+       
         const result = await getTasks();
         console.log(result.body)
         

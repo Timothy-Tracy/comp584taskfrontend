@@ -34,7 +34,7 @@ const formSchema = z.object({
 function LoginForm() {
   const {getStatus, isAuthenticated} = useAuth();
     const router = useRouter()
-    const {login} = useAuth()
+    const {login, setUser} = useAuth()
     const {toast} = useToast()
     // 1. Define your form.
 
@@ -67,8 +67,17 @@ function LoginForm() {
       })
 
     } else {
+      console.log(values.username)
+      console.log(values.username)
+
+      console.log(values.username)
+      console.log(values.username)
+
+      setUser(values.username)
       getStatus()
     if(isAuthenticated){
+      login(values.username)
+      
       router.push('/')
     }
     }

@@ -17,7 +17,7 @@ const LoginButton = () => {
                         <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
                         <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
-                    <p className="font-bold">{user?.username}</p>
+                    <p className="font-bold">Hello {user}</p>
                     <Link href='/login'>
                     <Button variant='destructive' onClick={()=>logout()}>Logout</Button>
                     </Link>

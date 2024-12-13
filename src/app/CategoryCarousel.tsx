@@ -15,9 +15,11 @@ export function Categories({defaultSelectedId}:{defaultSelectedId?: string}) {
     return (
         <>
         
-        <div className="flex flex-row flex-wrap items-center w-full justify-center border-2 rounded-md space-x-2">
+        <div className="flex flex-row flex-wrap items-center w-full justify-center  rounded-md space-x-2">
             Categories: 
             <RadioGroup className="flex flex-wrap">
+            <RadioGroupItem value={`${-1}`} id={`${-1}`} checked={`${-1}` == defaultSelectedId} onClick={()=>router.push(`/`)}/>
+            <Label htmlFor={`${-1}`}>{'All'}</Label>
                 {categories.map((value,index) => 
             
                     <div key={value.id} className="flex justify-center items-center space-x-2  w-max ">

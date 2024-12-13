@@ -33,8 +33,9 @@ const formSchema = z.object({
 const NewCategoryForm = () => {
     const router = useRouter()
     const {toast} = useToast()
-    const{initCategories} = useCategories();
-
+    const{initCategories,refreshCategories} = useCategories();
+    const {logout} = useAuth()
+    
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -50,8 +51,12 @@ const NewCategoryForm = () => {
                 title: `Successfully Added Category: ${values.title}`,
                
               })
-              initCategories()
+              refreshCategories()
         } else {
+            
+            if(result.status == 401){
+                logout()
+            }
             toast({
                 title: `Error: ${result.statusText}`,
                 description: `${JSON.stringify(result.body)}`,
@@ -62,12 +67,12 @@ const NewCategoryForm = () => {
     }
 
     return (
-        <div className='flex flex-row w-full align-middle items-center py-2'>
-
+        <div className='flex flex-row w-full justify-center  items-center py-2'>
+            
             <Form {...form}>
 
-                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-row  align-middle justify-center items-center  w-full">
-                    <div className="flex w-1/2  justify-start">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-row w-full  align-middle  items-center ">
+                    <div className="flex w-1/2 justify-center">
                         <FormField
                             control={form.control}
                             name="title"
@@ -83,7 +88,7 @@ const NewCategoryForm = () => {
                         />
 
                     </div>
-                    <div className="flex w-1/2  justify-end">
+                    <div className="flex w-1/2 justify-center ">
                         <Button type='submit'> Add Category</Button>
                     </div>
                   

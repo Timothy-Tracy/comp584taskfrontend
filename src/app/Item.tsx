@@ -1,55 +1,69 @@
 "use client"
-import { toggleTask } from "@/api/tasksapi";
+import { deleteTask, toggleTask } from "@/api/tasksapi";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ReactNode, useEffect, useState } from "react";
 import ChangeCategoryForm from "./ChangeCategoryForm";
 import { useCategories } from "@/hooks/CategoriesContext";
 import { useTasks } from "@/hooks/TasksContext";
+import { Button } from "@/components/ui/button";
 
-const Item = ( {children,  checked, id, task}: {children:ReactNode,  checked:boolean, id: number, task: any}) => {
-  const [isChecked, setIsChecked] = useState(checked)
-  const {categories, initCategories} = useCategories();
-  const{tasks, initTasks} = useTasks();
-  const {toast} = useToast()
-  useEffect(()=>{
-    initCategories()
-  },[])
-  function whichCategory(){
-    const x = categories.filter((category, index)=> category.id == task.categoryId)
-    return x[0]
+const Item = ({ task }: { task: any }) => {
+  if(!task){
+    return <></>
   }
-  async function handleToggle(){
-    const result = await toggleTask(id)
-    if(result.ok){
+  const [isChecked, setIsChecked] = useState(task?.complete||false)
+  const { categories, initCategories } = useCategories();
+  const { tasks, initTasks } = useTasks();
+  const { toast } = useToast()
+  
+  
+  async function handleToggle() {
+    const result = await toggleTask(task.id)
+    if (result.ok) {
       toast({
-          title: `Successfully ${isChecked ? "Unchecked":"Checked"} Task`,
-         
-        })
-        setIsChecked(result.body.complete)
-        initTasks()
-       
-  } else {
+        title: `Successfully ${isChecked ? "Unchecked" : "Checked"} Task`,
+      })
+      setIsChecked(result.body.complete)
+      initTasks()
+
+    } else {
       toast({
-          title: `Error: ${result.statusText}`,
-          description: `${JSON.stringify(result.body)}`,
-          variant: 'destructive'
-        })
+        title: `Error: ${result.statusText}`,
+        description: `${JSON.stringify(result.body)}`,
+        variant: 'destructive'
+      })
+    }
+
   }
- 
-  }  
+  async function handleDelete(){
+    await deleteTask(task.id)
+    await initTasks()
+  }
   return (
-        <div className="flex items-center space-x-2 py-2">
-      <Checkbox id={`${id}`} checked={isChecked} onClick={()=>handleToggle()}/>
-      <label
-        htmlFor={`${id}`}
-        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      >
-        {children}
-      </label>
-      <ChangeCategoryForm defaultValue={'hello'}></ChangeCategoryForm>
+    <div className="flex items-center py-2 w-3/4  justify-between ">
+      <div className="flex justify-start space-x-3 p-3">
+        <Checkbox id={`${task.id}`} checked={isChecked} onClick={() => handleToggle()} />
+        <label
+          htmlFor={`${task.id}`}
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+
+
+
+          {task.body}
+        </label>
+      </div>
+      <div className="flex justify-center">
+        <ChangeCategoryForm task={task} defaultValue={task.categoryId}></ChangeCategoryForm>
+      </div>
+      <div className="flex justify-end">
+        <Button variant={'destructive'} onClick={()=>{
+          handleDelete()
+        }}>Delete Task</Button>
+      </div>
     </div>
-     );
+  );
 }
- 
+
 export default Item;

@@ -114,10 +114,10 @@ dotenv.config()
     return result
   }
 
-  export const deleteCategory= async(id:number) => {
+  export const deleteTask= async(id:number) => {
     console.log(process.env.API_URL)
     
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/category/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Task/${id}`, {
         method: 'DELETE',
         headers: { 
           'Content-Type': 'application/json',
