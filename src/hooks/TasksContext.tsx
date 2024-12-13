@@ -1,6 +1,7 @@
 "use client"
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getTasks } from '@/api/tasksapi';
+import { useCategories } from './CategoriesContext';
 
 // Define the context type
 interface TasksContextType {
@@ -14,10 +15,14 @@ const TasksContext = createContext<TasksContextType | undefined>(undefined);
 // Create a provider component
 export const TasksProvider = ({ children }: { children: ReactNode }) => {
     const [tasks, setTasks] = useState<Array<any>>([]);
+    const { categories, initCategories } = useCategories();
 
     const initTasks = async () => {
         console.log('initTasks called');
+        await initCategories()
         const result = await getTasks();
+        console.log(result.body)
+        
         setTasks(result.body);
     };
 

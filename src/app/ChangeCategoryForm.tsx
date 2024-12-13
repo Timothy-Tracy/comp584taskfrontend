@@ -129,9 +129,7 @@ const ChangeCategoryForm = ({defaultValue}: {defaultValue:string}) => {
                         />
 
                     </div>
-                    <div className="flex w-1/2  justify-end">
-                        <Button type='submit'> Add Task</Button>
-                    </div>
+                    
 
 
 

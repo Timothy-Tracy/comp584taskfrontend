@@ -21,6 +21,7 @@ export const CategoriesProvider = ({ children }: { children: ReactNode }) => {
         const result = await getCategories();
         setCategories(result.body);
     };
+    
 
     useEffect(() => {
         initCategories();
