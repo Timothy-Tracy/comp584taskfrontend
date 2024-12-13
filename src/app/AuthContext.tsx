@@ -1,5 +1,5 @@
 "use client"
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 // Define the user type
 type User = {
@@ -11,6 +11,7 @@ type User = {
 interface AuthContextType {
   user: User;
   isAuthenticated: boolean;
+  getStatus: () => void;
   login: (username: string) => void;
   logout: () => void;
 }
@@ -26,21 +27,35 @@ interface AuthProviderProps {
 // Create the provider component
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User>(null);
-
+  const [status, setStatus] = useState<boolean>(false);
+  
   const login = (username: string) => {
     const mockUser: User = { id: 1, username };
     setUser(mockUser);
   };
 
   const logout = () => {
-    setUser(null);
+    localStorage.removeItem('token')
+    getStatus()
   };
 
+  const getStatus = () => {
+    if (localStorage.getItem('token') == null){
+      setStatus(false)
+    } else {
+      setStatus(true)
+    }
+  };
+
+  useEffect(()=> {
+    getStatus()
+  }, [])
  
 
   const value: AuthContextType = {
     user,
-    isAuthenticated: !!user,
+    isAuthenticated: !!status,
+    getStatus,
     login,
     logout,
   };

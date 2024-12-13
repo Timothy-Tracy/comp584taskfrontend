@@ -3,6 +3,9 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Header from "./Header";
 import { AuthProvider } from "./AuthContext";
+import { Toaster } from "@/components/ui/toaster";
+import { CategoriesProvider } from "@/hooks/CategoriesContext";
+import { TasksProvider } from "@/hooks/TasksContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,13 +34,18 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
+          <CategoriesProvider>
+            <TasksProvider>
         <div className="flex flex-col h-screen w-screen">
           <Header></Header>
           <div className="flex flex-col h-full w-full border-2 border-red-600">
             {children}
+            <Toaster/>
 
           </div>
         </div>
+        </TasksProvider>
+        </CategoriesProvider>
         </AuthProvider>
 
       </body>

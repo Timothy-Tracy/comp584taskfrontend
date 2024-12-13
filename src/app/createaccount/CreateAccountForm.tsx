@@ -18,71 +18,56 @@ import { Input } from "@/components/ui/input"
 import { useAuth } from "../AuthContext"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import loginapi from "@/api/login"
-import { useEffect } from "react"
+import createaccountapi from "@/api/createaccountapi"
 import { useToast } from "@/hooks/use-toast"
 
 const formSchema = z.object({
   username: z.string().min(2, {
     message: "Username must be at least 2 characters.",
   }),
+  email: z.string().email(),
   password: z.string().min(2, {
     message: "Password must be at least 2 characters.",
   }),
 })
 
-function LoginForm() {
-  const {getStatus, isAuthenticated} = useAuth();
-    const router = useRouter()
-    const {login} = useAuth()
-    const {toast} = useToast()
-    // 1. Define your form.
-
-  useEffect(()=>{
-    getStatus()
-    if (isAuthenticated){
-      router.push('/')
-    }
-  })
+function CreateAccountForm() {
+  const router = useRouter()
+  const { login } = useAuth()
+  const {toast} = useToast()
+  // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
+      email: "",
       password: ""
     },
   })
- 
+
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values)
-    const result = await loginapi(values.username, values.password)
-    if(!result.ok){
+    const response = await createaccountapi(values.username, values.email, values.password)
+    if(!response.ok){
       console.log('toasting')
       toast({
-        title: `Error: ${result.statusText}`,
-        description: `${JSON.stringify(result.body)}`,
+        title: `Error: ${response.statusText}`,
+        description: `${JSON.stringify(response.body)}`,
         variant: 'destructive'
       })
-
-    } else {
-      getStatus()
-    if(isAuthenticated){
-      router.push('/')
     }
-    }
-    
 
-    
 
-    
+
   }
   // ...
 
   return (
     <Form {...form}>
-      <h1>Login</h1>
+      <h1>Create Account</h1>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
@@ -91,12 +76,28 @@ function LoginForm() {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input  {...field} />
+                <Input {...field} />
               </FormControl>
-              
+
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input  type="email" {...field} />
+              </FormControl>
+
+            </FormItem>
+          )}
+        />
+
+
         <FormField
           control={form.control}
           name="password"
@@ -106,20 +107,20 @@ function LoginForm() {
               <FormControl>
                 <Input  type="password" {...field} />
               </FormControl>
-              
+
             </FormItem>
           )}
         />
         <div className="space-x-2">
-          <Link href='/createaccount'>
-          
-        <Button variant='secondary'>Create Account</Button>
-        
-</Link>
-        <Button type="submit">Submit</Button>
+          <Link href='/login'>
+
+            <Button variant={'secondary'}>Back To Login</Button>
+
+          </Link>
+          <Button type="submit">Submit</Button>
         </div>
       </form>
     </Form>
   )
 }
-export default LoginForm
+export default CreateAccountForm

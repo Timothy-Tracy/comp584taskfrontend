@@ -1,5 +1,7 @@
 import { Categories } from "./CategoryCarousel";
 import Item from "./Item";
+import NewTaskForm from "./NewTaskForm";
+import Tasks from "./Tasks";
 
 export default function Home() {
   return (
@@ -7,9 +9,9 @@ export default function Home() {
     <Categories/>
    <div className="flex flex-col h-full w-full justify-center p-5 items-center">
     
-    <Item>Hello</Item>
-    <Item>Hello</Item>
-    <Item>Hello3</Item>
+    <Tasks></Tasks>
+    <NewTaskForm/>
+    
 
    </div>
    </>
